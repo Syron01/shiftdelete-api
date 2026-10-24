@@ -1,4 +1,6 @@
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
 const { UpstreamError, gate } = require('./http');
 const cache = require('./cache');
 const { apiRateLimit } = require('./rateLimit');
@@ -18,8 +20,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// API dokümantasyonu: kök adres tüm endpointleri listeler
+// Web arayüzü: tek dosyalık docs + canlı deneme sayfası (PC ve mobil)
 app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+});
+
+// API dokümantasyonu (JSON): tüm endpointleri listeler
+app.get('/api', (req, res) => {
   const B = '/api/v1';
   res.json({
     name: 'ShiftDelete.Net Unofficial API',
@@ -97,7 +104,7 @@ app.use('/api/v1', require('./routes/misc'));
 
 // 404 — bilinmeyen endpoint
 app.use((req, res) => {
-  res.status(404).json({ error: 'Endpoint bulunamadı', hint: 'Tüm listeyi görmek için GET / çağırın' });
+  res.status(404).json({ error: 'Endpoint bulunamadı', hint: 'Dokümantasyon için GET / (web) veya GET /api (JSON) çağırın' });
 });
 
 // Merkezi hata yönetimi

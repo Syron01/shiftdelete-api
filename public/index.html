@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShiftDelete.Net Unofficial API</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #8b5cf6;
+    --accent2: #a78bfa;
+    --green: #3fb950;
+    --orange: #f0883e;
+    --red: #f85149;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ---------- Header ---------- */
+  header {
+    padding: 28px 20px 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #1a1625 0%, var(--bg) 100%);
+  }
+  header h1 { font-size: 1.45rem; }
+  header .sub { color: var(--muted); margin-top: 6px; font-size: .95rem; }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 14px; }
+  .badge {
+    font-size: .72rem; padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--bg2); color: var(--muted);
+  }
+  .badge b { color: var(--text); font-weight: 600; }
+  .thanks {
+    margin: 16px auto 0; max-width: 640px; font-size: .85rem; color: var(--muted);
+    padding: 10px 16px; border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--bg2);
+  }
+  .thanks a { color: var(--accent2); text-decoration: none; }
+  .thanks a:hover { text-decoration: underline; }
+
+  /* ---------- Layout ---------- */
+  .layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 0;
+    max-width: 1280px;
+    margin: 0 auto;
+    min-height: 60vh;
+  }
+  @media (max-width: 820px) {
+    .layout { grid-template-columns: 1fr; }
+    nav { border-right: none !important; border-bottom: 1px solid var(--border); }
+  }
+
+  /* ---------- Sidebar ---------- */
+  nav {
+    border-right: 1px solid var(--border);
+    padding: 18px 12px;
+    position: sticky; top: 0;
+    align-self: start;
+    max-height: 100vh; overflow-y: auto;
+  }
+  @media (max-width: 820px) {
+    nav { position: static; max-height: 40vh; }
+  }
+  nav .group-title {
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); margin: 16px 8px 6px; font-weight: 700;
+  }
+  .ep-btn {
+    display: block; width: 100%; text-align: left;
+    background: none; border: 1px solid transparent; border-radius: 8px;
+    color: var(--text); font-size: .82rem; font-family: ui-monospace, Consolas, monospace;
+    padding: 7px 10px; cursor: pointer; margin-bottom: 2px;
+  }
+  .ep-btn:hover { background: var(--bg2); }
+  .ep-btn.active { background: var(--bg3); border-color: var(--accent); }
+  .ep-btn .m { color: var(--green); font-weight: 700; margin-right: 6px; font-size: .7rem; }
+
+  /* ---------- Main ---------- */
+  main { padding: 22px 20px 60px; }
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 18px;
+  }
+  .card h2 { font-size: 1.05rem; margin-bottom: 4px; }
+  .card .desc { color: var(--muted); font-size: .9rem; margin-bottom: 14px; }
+  .method {
+    display: inline-block; font-size: .7rem; font-weight: 700;
+    color: var(--green); border: 1px solid var(--green);
+    border-radius: 6px; padding: 1px 8px; margin-bottom: 10px;
+  }
+  .url-box {
+    font-family: ui-monospace, Consolas, monospace; font-size: .85rem;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px; word-break: break-all;
+    color: var(--accent2);
+  }
+  .params { margin-top: 14px; display: grid; gap: 10px; }
+  @media (min-width: 600px) { .params.two { grid-template-columns: 1fr 1fr; } }
+  .field label { display: block; font-size: .75rem; color: var(--muted); margin-bottom: 4px; }
+  .field input, .field select {
+    width: 100%; background: var(--bg); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 10px; font-size: .88rem; font-family: ui-monospace, Consolas, monospace;
+  }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
+  .actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  button.run {
+    background: var(--accent); color: #fff; border: none;
+    padding: 9px 22px; border-radius: 8px; font-size: .9rem;
+    font-weight: 600; cursor: pointer;
+  }
+  button.run:hover { background: var(--accent2); }
+  button.run:disabled { opacity: .5; cursor: wait; }
+  .copy {
+    background: var(--bg3); color: var(--text); border: 1px solid var(--border);
+    padding: 9px 14px; border-radius: 8px; font-size: .85rem; cursor: pointer;
+  }
+  .copy:hover { border-color: var(--accent); }
+  .status { font-size: .78rem; color: var(--muted); }
+  .status.ok { color: var(--green); }
+  .status.err { color: var(--red); }
+
+  pre {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px; overflow-x: auto;
+    font-size: .8rem; font-family: ui-monospace, Consolas, monospace;
+    max-height: 520px; overflow-y: auto; line-height: 1.55;
+    white-space: pre-wrap; word-break: break-word;
+  }
+
+  /* ---------- Welcome ---------- */
+  .hero { max-width: 860px; margin: 0 auto; }
+  .hero .card h2 { font-size: 1.15rem; }
+  .feat { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); margin-top: 12px; }
+  .feat div {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px; font-size: .85rem;
+  }
+  .feat b { display: block; margin-bottom: 3px; }
+
+  /* ---------- Health strip ---------- */
+  .health-strip {
+    display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px;
+    font-size: .8rem; color: var(--muted);
+  }
+  .health-strip b { color: var(--text); }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+  .dot.on { background: var(--green); }
+  .dot.off { background: var(--red); }
+
+  footer {
+    text-align: center; padding: 26px 16px 34px; color: var(--muted);
+    font-size: .8rem; border-top: 1px solid var(--border);
+  }
+  footer a { color: var(--accent2); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📰 ShiftDelete.Net Unofficial API</h1>
+  <div class="sub">Tüm uç noktalar · canlı deneme · dokümantasyon — tek sayfada</div>
+  <div class="badges">
+    <span class="badge"><b>29</b> endpoint</span>
+    <span class="badge"><b>v1</b> · <code>/api/v1</code></span>
+    <span class="badge">⭐ <b>?lang=en</b> destekli</span>
+    <span class="badge">MIT · Unofficial</span>
+  </div>
+  <div class="thanks">
+    💌 Bu proje <a href="https://shiftdelete.net" target="_blank" rel="noopener">ShiftDelete.Net</a> ekibinin
+    emeğine duyulan hayranlıktan doğdu — kendilerine <b>teşekkür ederiz</b> 🙏
+    Tüm içerik hakları ShiftDelete.Net'e aittir. JSON dokümantasyon: <code>GET /api</code>
+  </div>
+</header>
+
+<div class="layout">
+  <nav id="nav"></nav>
+  <main id="main">
+    <div class="hero">
+      <div class="card">
+        <h2>Hoş geldiniz 👋</h2>
+        <p class="desc">
+          Soldan (mobilde üstten) bir uç nokta seçin, parametrelerini girin ve
+          <b>Çalıştır</b>'a basın — canlı yanıtı anında görürsünüz.
+        </p>
+        <div class="feat">
+          <div><b>📄 Sayfalama</b><code>?page= &amp; per_page=</code><br>varsayılan 12, en fazla 50</div>
+          <div><b>🌍 Dil</b>Tüm uç noktalarda <code>?lang=en</code><br>varsayılan <code>tr</code></div>
+          <div><b>🗄️ Önbellek</b>5 dk taze + eski yanıt yedeği<br>site asla yorulmaz</div>
+          <div><b>🧯 Hatalar</b>Her hata düzgün JSON<br>iç yapı sızmaz</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>💚 Servis durumu</h2>
+        <p class="desc" id="health-desc">Yükleniyor…</p>
+        <div class="health-strip" id="health-strip"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<footer>
+  Resmi değildir · içerik hakları <a href="https://shiftdelete.net" target="_blank" rel="noopener">ShiftDelete.Net</a>'e aittir ·
+  site istemezse proje memnuniyetle kaldırılır 🌱
+</footer>
+
+<script>
+const B = '/api/v1';
+
+const ENDPOINTS = [
+  { group: 'Genel', items: [
+    { id:'health', path:'/health', desc:'Servis + upstream + önbellek durumu. Devre kesici, trafik sayaçları, isabet oranı.' },
+    { id:'nav', path:'/nav', desc:'Sitenin ana menüsü — 16 bölüm ve özel içerik yolları.' },
+    { id:'rss', path:'/rss', desc:'Ana RSS akışının normalize edilmiş hâli.' },
+    { id:'sitemap', path:'/sitemap/urls', desc:'Sitemap URL\'leri.',
+      params:[{n:'kind',t:'select',o:['news','pages','posts'],v:'posts'},{n:'page',t:'text',v:'1'}] },
+  ]},
+  { group: 'Haber', items: [
+    { id:'latest', path:'/latest', desc:'Son haberler.',
+      params:[{n:'page',t:'text',v:'1'},{n:'per_page',t:'text',v:'6'}] },
+    { id:'news', path:'/news/:slug', desc:'Tam makale: içerik HTML + düz metin, yazar, kategoriler, etiketler, kapak, okuma süresi, SEO.',
+      params:[{n:'slug',t:'text',v:'yeni-nesil-ds-n7-turkiyede-satisa-sunuldu',req:true}] },
+    { id:'related', path:'/news/:slug/related', desc:'Aynı ana kategoriden 6 benzer haber.',
+      params:[{n:'slug',t:'text',v:'',req:true,ph:'makale-slug'}] },
+    { id:'ncomments', path:'/news/:slug/comments', desc:'Makalenin yorumları.',
+      params:[{n:'slug',t:'text',v:'',req:true,ph:'makale-slug'}] },
+  ]},
+  { group: 'Bölümler', items: [
+    { id:'videos', path:'/videos', desc:'SDN TV içerikleri.', params:PAGE_PARAMS() },
+    { id:'gallery', path:'/gallery', desc:'Foto galeri yazıları.', params:PAGE_PARAMS() },
+    { id:'reviews', path:'/reviews', desc:'İncelemeler.', params:PAGE_PARAMS() },
+    { id:'howto', path:'/howto', desc:'Nasıl Yapılır? yazıları.', params:PAGE_PARAMS() },
+  ]},
+  { group: 'Kategori', items: [
+    { id:'categories', path:'/categories', desc:'166 kategori.',
+      params:[{n:'search',t:'text',v:'',ph:'filtre (opsiyonel)'}] },
+    { id:'category', path:'/categories/:slug', desc:'Kategori bilgisi + haberleri.',
+      params:[{n:'slug',t:'text',v:'',req:true,ph:'kategori-slug'},{n:'per_page',t:'text',v:'6'}] },
+  ]},
+  { group: 'Arama', items: [
+    { id:'search', path:'/search', desc:'Hızlı arama — başlık + adres.',
+      params:[{n:'q',t:'text',v:'iphone',req:true}] },
+    { id:'searchposts', path:'/search/posts', desc:'Tam haber nesneleriyle arama.',
+      params:[{n:'q',t:'text',v:'iphone',req:true}] },
+  ]},
+  { group: 'Etiket', items: [
+    { id:'tags', path:'/tags', desc:'Etiket arama — 276.000+ etiket.',
+      params:[{n:'search',t:'text',v:'iphone',req:true}] },
+    { id:'tag', path:'/tags/:slug', desc:'Etiket + o etiketin haberleri.',
+      params:[{n:'slug',t:'text',v:'',req:true,ph:'etiket-slug'}] },
+  ]},
+  { group: 'Yazar', items: [
+    { id:'authors', path:'/authors', desc:'Yazar listesi — 348 kişi.',
+      params:[{n:'search',t:'text',v:'',ph:'filtre (opsiyonel)'}] },
+    { id:'author', path:'/authors/:slug', desc:'Yazar profili: bio, avatar.' ,
+      params:[{n:'slug',t:'text',v:'',req:true,ph:'yazar-slug'}] },
+    { id:'authorposts', path:'/authors/:slug/posts', desc:'Yazarın yazıları.',
+      params:[{n:'slug',t:'text',v:'',req:true,ph:'yazar-slug'},{n:'per_page',t:'text',v:'6'}] },
+  ]},
+  { group: 'Yorum', items: [
+    { id:'clatest', path:'/comments/latest', desc:'Siteden son yorumlar.' },
+    { id:'comments', path:'/comments', desc:'Belirli makalenin yorumları.',
+      params:[{n:'post',t:'text',v:'',req:true,ph:'makale id (sayı)'}] },
+  ]},
+  { group: 'Ürün', items: [
+    { id:'products', path:'/products', desc:'Karşılaştırma veritabanında arama.',
+      params:[{n:'search',t:'text',v:'redmi',req:true}] },
+    { id:'product', path:'/products/:slug', desc:'Tam özellik tablosu (gruplu) + puanlar.',
+      params:[{n:'slug',t:'text',v:'xiaomi-redmi-note-15-pro-2',req:true}] },
+  ]},
+  { group: 'Sayfa', items: [
+    { id:'pages', path:'/pages', desc:'Kurumsal sayfalar — künye, iletişim…' },
+    { id:'page', path:'/pages/:slug', desc:'Sayfa içeriği.',
+      params:[{n:'slug',t:'text',v:'',req:true,ph:'sayfa-slug'}] },
+  ]},
+  { group: 'Medya', items: [
+    { id:'media', path:'/media/:id', desc:'Kapak/görsel detayı + tüm boyut URL\'leri.',
+      params:[{n:'id',t:'text',v:'',req:true,ph:'medya id (sayı)'}] },
+  ]},
+];
+
+function PAGE_PARAMS(){ return [{n:'page',t:'text',v:'1'},{n:'per_page',t:'text',v:'6'}]; }
+
+const nav = document.getElementById('nav');
+const main = document.getElementById('main');
+
+for (const g of ENDPOINTS) {
+  const t = document.createElement('div');
+  t.className = 'group-title'; t.textContent = g.group;
+  nav.appendChild(t);
+  for (const ep of g.items) {
+    const b = document.createElement('button');
+    b.className = 'ep-btn';
+    b.innerHTML = '<span class="m">GET</span>' + ep.path;
+    b.onclick = () => show(ep, b);
+    ep._btn = b;
+    nav.appendChild(b);
+  }
+}
+
+function show(ep, btn) {
+  document.querySelectorAll('.ep-btn').forEach(x => x.classList.remove('active'));
+  btn.classList.add('active');
+  main.innerHTML = `
+    <div class="card">
+      <span class="method">GET</span>
+      <h2><code>${B}${ep.path}</code></h2>
+      <p class="desc">${ep.desc}</p>
+      <div class="url-box" id="urlbox">${B}${ep.path}</div>
+      ${ep.params ? `<div class="params ${ep.params.length > 1 ? 'two' : ''}">
+        ${ep.params.map((p,i) => `
+          <div class="field">
+            <label>${p.n}${p.req ? ' *' : ''}</label>
+            ${p.t === 'select'
+              ? `<select data-i="${i}">${p.o.map(o=>`<option ${o===p.v?'selected':''}>${o}</option>`).join('')}</select>`
+              : `<input data-i="${i}" value="${p.v||''}" placeholder="${p.ph||''}">`}
+          </div>`).join('')}
+        <div class="field">
+          <label>lang</label>
+          <select id="lang"><option value="tr">tr</option><option value="en">en</option></select>
+        </div>
+      </div>` : ''}
+      <div class="actions">
+        <button class="run" id="run">▶ Çalıştır</button>
+        <button class="copy" id="copy">📋 URL kopyala</button>
+        <span class="status" id="status"></span>
+      </div>
+    </div>
+    <div class="card" id="rescard" style="display:none">
+      <h2>Yanıt</h2>
+      <p class="desc" id="meta-desc"></p>
+      <pre id="res"></pre>
+    </div>
+  `;
+
+  const params = ep.params || [];
+  const buildURL = () => {
+    let url = B + ep.path;
+    for (const p of params) {
+      if (p.t === 'select') {
+        const sel = main.querySelector(`select[data-i="${params.indexOf(p)}"]`);
+        p.val = sel ? sel.value : p.v;
+      } else {
+        const inp = main.querySelector(`input[data-i="${params.indexOf(p)}"]`);
+        p.val = inp ? inp.value.trim() : '';
+      }
+      url = url.replace(':' + p.n, p.val || ':' + p.n);
+    }
+    const q = new URLSearchParams();
+    for (const p of params) if (p.n !== 'slug' && p.n !== 'id' && p.n !== 'post' && p.val) q.set(p.n, p.val);
+    const lang = document.getElementById('lang');
+    if (lang && lang.value === 'en') q.set('lang', 'en');
+    const qs = q.toString();
+    return url + (qs ? '?' + qs : '');
+  };
+
+  const refresh = () => { document.getElementById('urlbox').textContent = buildURL(); };
+  main.querySelectorAll('input,select').forEach(el => el.addEventListener('input', refresh));
+  refresh();
+
+  const run = document.getElementById('run');
+  run.onclick = async () => {
+    for (const p of params) {
+      if (p.req && !p.val) {
+        const st = document.getElementById('status');
+        st.className = 'status err';
+        st.textContent = `⚠ "${p.n}" alanı gerekli`;
+        return;
+      }
+    }
+    const url = buildURL();
+    run.disabled = true;
+    const st = document.getElementById('status');
+    st.className = 'status'; st.textContent = '⏳ yükleniyor…';
+    const t0 = Date.now();
+    try {
+      const r = await fetch(url);
+      const j = await r.json();
+      const dt = Date.now() - t0;
+      st.className = 'status ' + (r.ok ? 'ok' : 'err');
+      st.textContent = r.ok ? `✓ ${r.status} · ${dt}ms` : `✗ ${r.status}`;
+      const card = document.getElementById('rescard');
+      card.style.display = '';
+      document.getElementById('meta-desc').textContent =
+        j && j.meta ? `${j.meta.total} kayıt · sayfa ${j.meta.page}/${j.meta.totalPages} · sayfa başına ${j.meta.perPage}` : '';
+      document.getElementById('res').textContent = JSON.stringify(j, null, 2);
+    } catch (e) {
+      st.className = 'status err';
+      st.textContent = '✗ ' + e.message;
+    } finally {
+      run.disabled = false;
+    }
+  };
+  document.getElementById('copy').onclick = () => {
+    navigator.clipboard.writeText(location.origin + buildURL());
+    document.getElementById('status').textContent = '📋 kopyalandı';
+  };
+}
+
+/* Health strip */
+(async () => {
+  const d = document.getElementById('health-desc');
+  const s = document.getElementById('health-strip');
+  try {
+    const r = await fetch(B + '/health');
+    const j = await r.json();
+    d.textContent = 'Upstream ve önbellek anlık durumu:';
+    const rows = [];
+    if (j.upstream) rows.push(`<span><span class="dot ${j.upstream.circuitOpen ? 'off' : 'on'}"></span>Upstream: <b>${j.upstream.circuitOpen ? 'dinleniyor' : 'açık'}</b></span>`);
+    if (j.cache) rows.push(`<span>🗄️ Önbellek isabeti: <b>${j.cache.hitRatio ?? j.cache.hits ?? '-'}</b></span>`);
+    if (j.gate) rows.push(`<span>🚦 Siteye: <b>${j.gate.inFlight ?? 0}</b> istek uçta</span>`);
+    if (!rows.length) rows.push(`<pre style="max-height:200px">${JSON.stringify(j, null, 2)}</pre>`);
+    s.innerHTML = rows.join('');
+  } catch {
+    d.textContent = 'Durum alınamadı.';
+  }
+})();
+</script>
+</body>
+</html>
