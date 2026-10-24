@@ -11,6 +11,9 @@
 **ShiftDelete.Net'in tüm içeriğine ulaşan,**
 **tek bir temiz JSON API.**
 
+🌐 **Web arayüzü + canlı deneme:**
+**[syron01.github.io/shiftdelete-api](https://syron01.github.io/shiftdelete-api/)**
+
 Kişisel ve eğitim amaçlı bir projedir.
 Siteyle resmi bir bağı yoktur.
 
