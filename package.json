@@ -1,0 +1,18 @@
+{
+  "name": "shiftdelete-api",
+  "version": "1.0.0",
+  "description": "ShiftDelete.Net unofficial REST API — haberler, kategoriler, arama, yazarlar, yorumlar, ürün karşılaştırma ve daha fazlası",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test test/normalize.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "license": "MIT"
+}
