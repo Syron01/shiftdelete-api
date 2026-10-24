@@ -1,108 +1,407 @@
+<div align="center">
+
 # ShiftDelete.Net Unofficial API 📰
 
-> **Öncelikle:** Bu proje, [ShiftDelete.Net](https://shiftdelete.net) ekibinin yıllardır ortaya koyduğu emeğe duyulan hayranlıktan doğdu. Harika bir içerik arşivi oluşturdukları için kendilerine **çok teşekkür ederiz**. 🙏
+<img src="https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js 18+">
+<img src="https://img.shields.io/badge/Express-4.x-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express 4">
+<img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="MIT License">
+<img src="https://img.shields.io/badge/Unofficial-%E2%9D%A4-orange?style=for-the-badge" alt="Unofficial">
 
-ShiftDelete.Net'in kamuya açık WordPress altyapısını kullanan, kişisel ve eğitim amaçlı hazırlanmış küçük bir JSON API projesidir. Siteyle resmi bir bağlantısı yoktur; ticari hiçbir amacı yoktur.
+</div>
 
-## Peki ama neden? 🤔
+<br>
 
-Sitenin içeriğini programatik olarak okumak istediğinizde (bir okuma uygulaması, haftalık özet botu, araştırma projesi…) her seferinde aynı kazıma/sıralama kodunu yazmak gerekir. Bu proje o işi tek bir temiz JSON katmanında toplar — ve bunu yaparken siteyi asla yormamayı ilke edinir.
+> 💌 **Öncelikle:**
+>
+> Bu proje, [ShiftDelete.Net](https://shiftdelete.net) ekibinin
+> yıllardır ortaya koyduğu emeğe duyulan hayranlıktan doğdu.
+>
+> Harika bir içerik arşivi oluşturdukları için
+> kendilerine **çok teşekkür ederiz** 🙏
 
-## Siteye saygı: nasıl nazik davranıyoruz? 💚
+<br>
 
-Bu API, upstream'e (shiftdelete.net) karşı bilerek "iyi komşu" gibi davranacak şekilde tasarlandı:
+## ❓ Bu ne?
 
-1. **Hız sınırı** — Bu sunucuya gelen istekler IP başına dakikada 60 ile sınırlıdır (ayarlanabilir). Aşan isteklere nazik bir 429 ve `Retry-After` döner.
-2. **Nazik trafik kapısı** — Siteye aynı anda en fazla 4 istek gider, istekler arasında en az 120 ms nefes payı bırakılır, dakikada 120 istek üst sınırı vardır.
-3. **Yeniden deneme + devre kesici** — Geçici hatalarda üssel beklemeyle en fazla 3 deneme yapılır; siteye 5 hatada bir 30 saniyelik "sessizlik" verilir ve periyodik probla durum düzelir.
-4. **Önbellek** — Yanıtlar 5 dakika taze tutulur ve diske yazılır; aynı içerik için site tekrar tekrar yorulmaz.
+Kişisel ve eğitim amaçlı, küçük bir JSON API projesidir.
 
-Tüm eşikler ortam değişkenleriyle ayarlanabilir (tam liste: `src/config.js`). Anlık durumu `GET /api/v1/health` gösterir.
+Sitenin kamuya açık WordPress altyapısını kullanır.
 
-## Çalıştırma 🚀
+Siteyle **resmi bir bağlantısı yoktur.**
+Ticari hiçbir amacı yoktur.
+
+<br>
+
+Diyelim ki bir okuma uygulaması ya da
+haftalık özet botu yazmak istiyorsunuz.
+
+Her seferinde aynı kazıma kodunu
+yazmak yerine — bu API tek bir
+temiz JSON katmanı sunar.
+
+Ve bunu yaparken siteyi **asla yormaz.**
+
+<br>
+
+## 💚 Siteye saygı
+
+Bu API, siteye karşı "iyi komşu" gibi davranır.
+
+Dört katman üst üste çalışır:
+
+<br>
+
+**1. Hız sınırı** 🚦
+
+Dakikada en fazla 60 istek (IP başına).
+
+Aşan isteklere nazik bir `429` döner.
+
+<br>
+
+**2. Nazik trafik kapısı** 🚪
+
+Aynı anda en fazla 4 istek gider.
+
+İstekler arasında 120 ms nefes payı bırakılır.
+
+Dakikada 120 istek üst sınırı vardır.
+
+<br>
+
+**3. Devre kesici** 🔌
+
+Geçici hata olursa üssel beklemeyle
+en fazla 3 deneme yapılır.
+
+Site 5 hatada bir 30 saniyelik
+sessizliğe alınır ve dinlendirilir.
+
+<br>
+
+**4. Önbellek** 🗄️
+
+Yanıtlar 5 dakika taze tutulur,
+diske de yazılır.
+
+Aynı içerik için site
+tekrar tekrar yorulmaz.
+
+<br>
+
+<details>
+<summary>⚙️ İnce ayar (tıkla)</summary>
+
+<br>
+
+Tüm eşikler ortam değişkenleriyle
+ayarlanabilir.
+
+Tam liste: `src/config.js`
+
+Anlık durum: `GET /api/v1/health`
+
+</details>
+
+<br>
+
+## 🚀 Çalıştırma
 
 ```bash
 npm install
-npm start          # http://localhost:3000
-npm run dev        # dosya değişince yeniden başlar
-npm test           # birim testleri
+npm start
 ```
 
-Port değiştirmek için: `PORT=8080 npm start`
+Bitti ✨
 
-Çalışan endpoint listesi `GET http://localhost:3000/` adresinden de alınabilir.
+Adres: `http://localhost:3000`
 
-## Ortak özellikler
+<br>
 
-- **Sayfalama**: Liste uç noktalarında `?page=` ve `?per_page=` (varsayılan 12, en fazla 50). Yanıt `meta: { total, totalPages, page, perPage }` içerir.
-- **Dil**: Tüm uç noktalarda `?lang=en` ile İngilizce site (en.shiftdelete.net) üzerinden veri döner; varsayılan `tr`.
-- **Önbellek**: Upstream yanıtları 5 dakika taze tutulur ve diske yazılır; upstream geçici olarak erişilemezse eski yanıt servis edilir.
-- **Hatalar**: Tüm hatalar düzgün JSON döner; iç yapı sızmaz.
+<details>
+<summary>Diğer komutlar</summary>
 
-## Uç noktalar
+<br>
 
-| Bölüm | Uç nokta | Ne verir |
-|---|---|---|
-| Genel | `GET /api/v1/health` | Servis + upstream + önbellek durumu |
-| Genel | `GET /api/v1/nav` | Sitenin ana menüsü ve özel içerik yolları |
-| Genel | `GET /api/v1/rss` | Ana RSS akışının normalize edilmiş hâli |
-| Genel | `GET /api/v1/sitemap/urls?kind=news\|pages\|posts&page=1` | Sitemap URL'leri (posts: 185 parça, Google News: son 60) |
-| Haber | `GET /api/v1/latest` | Son haberler |
-| Haber | `GET /api/v1/news/:slug` | Tam makale: içerik, yazar, kategoriler, etiketler, kapak görseli, okuma süresi |
-| Haber | `GET /api/v1/news/:slug/related` | Aynı ana kategoriden 6 benzer haber |
-| Haber | `GET /api/v1/news/:slug/comments` | Makalenin yorumları |
-| Bölüm | `GET /api/v1/videos` | SDN TV içerikleri |
-| Bölüm | `GET /api/v1/gallery` | Foto galeri yazıları |
-| Bölüm | `GET /api/v1/reviews` | İncelemeler |
-| Bölüm | `GET /api/v1/howto` | Nasıl Yapılır? yazıları |
-| Kategori | `GET /api/v1/categories` | Kategori listesi (`?search=` ile filtre) |
-| Kategori | `GET /api/v1/categories/:slug` | Kategori bilgisi + haberleri |
-| Arama | `GET /api/v1/search?q=iphone` | Hızlı arama (başlık + adres) |
-| Arama | `GET /api/v1/search/posts?q=iphone` | Tam haber nesneleriyle arama |
-| Etiket | `GET /api/v1/tags?search=iphone` | Etiket arama |
-| Etiket | `GET /api/v1/tags/:slug` | Etiket + o etiketin haberleri |
-| Yazar | `GET /api/v1/authors` | Yazarlar (`?search=` destekli) |
-| Yazar | `GET /api/v1/authors/:slug` | Yazar profili (bio, avatar) + yazıları |
-| Yorum | `GET /api/v1/comments/latest` | Siteden son yorumlar |
-| Yorum | `GET /api/v1/comments?post=<id>` | Belirli makalenin yorumları (id ile) |
-| Ürün | `GET /api/v1/products?search=redmi` | Karşılaştırma veritabanındaki ürünler |
-| Ürün | `GET /api/v1/products/:slug` | Tam özellik tablosu (gruplu) ve puanlar |
-| Sayfa | `GET /api/v1/pages` | Kurumsal sayfalar (künye, iletişim…) |
-| Sayfa | `GET /api/v1/pages/:slug` | Sayfa içeriği |
-| Medya | `GET /api/v1/media/:id` | Kapak/görsel detayı + tüm boyut URL'leri |
+```bash
+npm run dev    # değişince yeniden başlar
+npm test       # birim testler
+```
 
-## Örnek
+Port değiştirmek için:
+
+```bash
+PORT=8080 npm start
+```
+
+</details>
+
+<br>
+
+## ✨ Ortak özellikler
+
+**Sayfalama** 📄
+
+`?page=` ve `?per_page=`
+
+Varsayılan 12, en fazla 50.
+
+<br>
+
+**Dil** 🌍
+
+`?lang=en` ile İngilizce veri.
+
+Varsayılan: `tr`
+
+<br>
+
+**Önbellek** 🗄️
+
+Site geçici olarak düşerse
+eski yanıt servis edilir.
+
+<br>
+
+**Hatalar** 🧯
+
+Her hata düzgün JSON döner.
+İç yapı sızmaz.
+
+<br>
+
+## 🗺️ Uç noktalar
+
+<br>
+
+### 🌐 Genel
+
+`GET /api/v1/health`
+
+Servis + site + önbellek durumu
+
+<br>
+
+`GET /api/v1/nav`
+
+Sitenin ana menüsü
+
+<br>
+
+`GET /api/v1/rss`
+
+RSS akışı, normalize edilmiş hâli
+
+<br>
+
+`GET /api/v1/sitemap/urls`
+
+Sitemap URL'leri
+
+<br>
+
+### 📰 Haber
+
+`GET /api/v1/latest`
+
+Son haberler
+
+<br>
+
+`GET /api/v1/news/:slug`
+
+Tam makale — içerik, yazar,
+kapak görseli, okuma süresi
+
+<br>
+
+`GET /api/v1/news/:slug/related`
+
+6 benzer haber
+
+<br>
+
+`GET /api/v1/news/:slug/comments`
+
+Makalenin yorumları
+
+<br>
+
+### 📚 Bölümler
+
+`GET /api/v1/videos` — SDN TV 🎬
+
+`GET /api/v1/gallery` — Foto galeri 📷
+
+`GET /api/v1/reviews` — İncelemer 🔍
+
+`GET /api/v1/howto` — Nasıl Yapılır 🛠️
+
+<br>
+
+### 🗂️ Kategori
+
+`GET /api/v1/categories`
+
+Kategori listesi
+
+<br>
+
+`GET /api/v1/categories/:slug`
+
+Kategori + haberleri
+
+<br>
+
+### 🔎 Arama
+
+`GET /api/v1/search?q=iphone`
+
+Hızlı arama
+
+<br>
+
+`GET /api/v1/search/posts?q=iphone`
+
+Tam nesnelerle arama
+
+<br>
+
+### 🏷️ Etiket
+
+`GET /api/v1/tags?search=iphone`
+
+Etiket arama
+
+<br>
+
+`GET /api/v1/tags/:slug`
+
+Etiket + haberleri
+
+<br>
+
+### ✍️ Yazar
+
+`GET /api/v1/authors`
+
+Yazarlar
+
+<br>
+
+`GET /api/v1/authors/:slug`
+
+Yazar profili + yazıları
+
+<br>
+
+### 💬 Yorum
+
+`GET /api/v1/comments/latest`
+
+Son yorumlar
+
+<br>
+
+`GET /api/v1/comments?post=<id>`
+
+Makalenin yorumları (id ile)
+
+<br>
+
+### 📱 Ürün
+
+`GET /api/v1/products?search=redmi`
+
+Ürün arama
+
+<br>
+
+`GET /api/v1/products/:slug`
+
+Tam özellik tablosu + puanlar
+
+<br>
+
+### 📄 Sayfa & Medya
+
+`GET /api/v1/pages` — Kurumsal sayfalar
+
+`GET /api/v1/pages/:slug` — Sayfa içeriği
+
+`GET /api/v1/media/:id` — Görsel detayı
+
+<br>
+
+## 🧪 Örnek
 
 ```bash
 curl "http://localhost:3000/api/v1/latest?per_page=5"
-curl "http://localhost:3000/api/v1/news/yeni-nesil-ds-n7-turkiyede-satisa-sunuldu"
-curl "http://localhost:3000/api/v1/products/xiaomi-redmi-note-15-pro-2"
-curl "http://localhost:3000/api/v1/search?q=yapay+zeka&lang=en"
 ```
 
-## Mimari
+```bash
+curl "http://localhost:3000/api/v1/search?q=yapay+zeka"
+```
+
+<br>
+
+<details>
+<summary>📁 Mimari (tıkla)</summary>
+
+<br>
 
 ```
 server.js              → http dinleyici
-src/app.js             → Express uygulaması, dokümantasyon, merkezi hata yönetimi
-src/config.js          → site adresleri (tr/en), ana menü, önbellek ayarları
-src/cache.js           → TTL bellek önbelleği (5 dk)
-src/http.js            → upstream fetch katmanı (zaman aşımı, sayfalama başlıkları)
-src/normalize.js       → WP yanıtlarını sade şemaya çevirir + HTML→metin
-src/scrape/product.js  → /urun-detay/ özellik tablosu kazıyıcı
-src/routes/*.js        → uç nokta tanımları
-test/                  → birim testleri
+src/app.js             → Express + hata yönetimi
+src/config.js          → ayarlar
+src/cache.js           → önbellek
+src/http.js            → siteye bağlantı katmanı
+src/normalize.js       → yanıtları sadeleştirir
+src/scrape/product.js  → ürün özellik okuyucu
+src/routes/*.js        → uç noktalar
+test/                  → birim testler
 ```
 
-## Bilinen sınırlar
+</details>
 
-- **Trending ("Enler")**: Sitenin en çok okunanlar sayfası istemci tarafında ve admin-ajax robots.txt ile yasak olduğu için bu API'de yoktur; en yakın alternatif `latest` uç noktasıdır.
-- **Ürün özellikleri**: REST'te kapalı olduğu için HTML'den okunur; site şablonu değişirse `src/scrape/product.js` güncellenmelidir.
-- **Forum**: SDN forum (sdn.com.tr) ayrı bir site olduğundan kapsam dışıdır.
+<br>
 
-## Sorumluluk reddi ve teşekkürler ❤️
+## 🚧 Bilinen sınırlar
 
-- Bu proje **resmi değildir**; ShiftDelete.Net ile hiçbir bağı yoktur. Tüm içerik hakları ShiftDelete.Net'e aittir.
-- Kişisel, eğitim ve araştırma amaçlıdır. Ticari kullanım için lütfen doğrudan siteyle iletişime geçin.
-- İçeriği kaynağında ziyaret etmek her zaman için en iyisidir: **[shiftdelete.net](https://shiftdelete.net)** 💙
-- Site sahipleri bu projenin varlığını istemezlerse, memnuniyetle kaldırılır — yeter ki haberi olsun. 🌱
+**Trending ("Enler")** — sitede yok,
+en yakını `latest` uç noktası.
+
+**Ürün özellikleri** — HTML'den okunur,
+şablon değişirse güncellenmeli.
+
+**Forum** — ayrı site, kapsam dışı.
+
+<br>
+
+---
+
+<br>
+
+## ❤️ Teşekkürler
+
+Bu proje **resmi değildir.**
+
+ShiftDelete.Net ile hiçbir bağı yoktur.
+
+Tüm içerik hakları **ShiftDelete.Net**'e aittir.
+
+Kişisel, eğitim ve araştırma amaçlıdır.
+
+İçeriği kaynağında okumak her zaman
+en iyisidir: **[shiftdelete.net](https://shiftdelete.net)** 💙
+
+Site sahipleri istemezse,
+proje **memnuniyetle kaldırılır** 🌱
+
+<br>
+
+<div align="center">
+
+<sub>İyi okumalar 📚✨</sub>
+
+</div>
