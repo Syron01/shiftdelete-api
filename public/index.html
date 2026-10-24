@@ -221,7 +221,21 @@
 </footer>
 
 <script>
-const B = '/api/v1';
+let B = '/api/v1';
+
+// GitHub Pages gibi statik barındırmada backend adresi kullanıcıdan alınır;
+// API ile aynı origin'de çalışıyorsa otomatik aynı sunucu kullanılır.
+const API_DEFAULT = 'http://localhost:3000';
+const isStatic = !!(location.hostname.endsWith('.github.io') || location.protocol === 'file:');
+if (isStatic) {
+  B = (localStorage.getItem('apiBase') || API_DEFAULT).replace(/\/+$/, '') + '/api/v1';
+}
+window.setApiBase = function (v) {
+  v = (v || API_DEFAULT).trim().replace(/\/+$/, '');
+  localStorage.setItem('apiBase', v);
+  location.reload();
+};
+
 
 const ENDPOINTS = [
   { group: 'Genel', items: [
@@ -411,6 +425,18 @@ function show(ep, btn) {
     navigator.clipboard.writeText(location.origin + buildURL());
     document.getElementById('status').textContent = '📋 kopyalandı';
   };
+}
+
+/* Static mode: API adresi çubuğu */
+if (isStatic) {
+  const bar = document.createElement('div');
+  bar.style.cssText = 'max-width:640px;margin:14px auto 0;display:flex;gap:8px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg2)';
+  bar.innerHTML = `
+    <input id="apiBaseInput" value="${B.replace('/api/v1', '')}"
+      style="flex:1;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:.85rem;font-family:monospace">
+    <button onclick="setApiBase(document.getElementById('apiBaseInput').value)"
+      style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-weight:600;cursor:pointer">Bağlan</button>`;
+  document.querySelector('.thanks').after(bar);
 }
 
 /* Health strip */
