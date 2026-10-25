@@ -3,343 +3,471 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ShiftDelete.Net · Haberler</title>
+<title>ShiftDelete</title>
 <style>
   :root {
-    --bg:#0d1117; --bg2:#161b22; --bg3:#21262d; --border:#30363d;
-    --text:#e6edf3; --muted:#8b949e; --accent:#8b5cf6; --accent2:#a78bfa;
-    --green:#3fb950; --red:#f85149;
+    --bg:#000; --panel:#16181c; --panel2:#1d1f23; --hover:#1d1f23;
+    --border:#2f3336; --text:#e7e9ea; --muted:#71767b;
+    --accent:#1d9bf0; --accent-h:#1a8cd8; --like:#f91880;
   }
   * { box-sizing:border-box; margin:0; padding:0; }
+  html { scrollbar-color:#2f3336 transparent; }
   body {
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    background:var(--bg); color:var(--text); line-height:1.6;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+    background:var(--bg); color:var(--text); font-size:15px;
+    display:flex; justify-content:center; min-height:100vh;
   }
-  a { color:inherit; }
+  button { font-family:inherit; }
+  ::-webkit-scrollbar { width:8px; } ::-webkit-scrollbar-thumb { background:#2f3336; border-radius:4px; }
 
-  /* ---------- Header ---------- */
-  header {
-    position:sticky; top:0; z-index:50;
-    background:rgba(13,17,23,.92); backdrop-filter:blur(10px);
-    border-bottom:1px solid var(--border);
-    padding:12px 16px;
-    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
-  }
-  .logo { font-weight:800; font-size:1.05rem; cursor:pointer; white-space:nowrap; }
-  .logo span { color:var(--accent2); }
-  .searchbar {
-    flex:1; min-width:160px; max-width:480px;
-    display:flex; background:var(--bg2); border:1px solid var(--border); border-radius:999px;
-  }
-  .searchbar input {
-    flex:1; background:none; border:none; color:var(--text);
-    padding:9px 16px; font-size:.92rem; outline:none;
-  }
-  .searchbar button {
-    background:var(--accent); border:none; color:#fff; border-radius:0 999px 999px 0;
-    padding:0 18px; cursor:pointer; font-size:.9rem;
-  }
-  .conn { font-size:.75rem; color:var(--muted); display:flex; align-items:center; gap:6px; cursor:pointer; }
-  .conn .dot { width:8px; height:8px; border-radius:50%; background:var(--red); }
-  .conn.ok .dot { background:var(--green); }
+  /* ---------- Layout ---------- */
+  .layout { display:flex; width:100%; max-width:1290px; }
 
-  /* ---------- Tabs ---------- */
-  .tabs {
-    display:flex; gap:6px; padding:14px 16px 0; overflow-x:auto;
-    max-width:1200px; margin:0 auto; width:100%;
+  /* ---------- Left nav ---------- */
+  .side {
+    width:88px; padding:12px 8px; position:sticky; top:0;
+    height:100vh; display:flex; flex-direction:column; gap:4px;
+    border-right:1px solid var(--border); flex-shrink:0;
   }
-  .tab {
-    border:1px solid var(--border); background:var(--bg2); color:var(--muted);
-    padding:7px 16px; border-radius:999px; font-size:.85rem; cursor:pointer; white-space:nowrap;
+  @media (min-width:1280px) { .side { width:275px; padding:12px 16px; } }
+  .logo {
+    display:flex; align-items:center; gap:12px; padding:10px; border-radius:999px;
+    font-size:1.35rem; font-weight:800; cursor:pointer; color:var(--accent);
   }
-  .tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .logo:hover { background:var(--hover); }
+  .navitem {
+    display:flex; align-items:center; gap:16px; padding:12px; border-radius:999px;
+    cursor:pointer; color:var(--text); font-size:1.05rem; background:none; border:none;
+    text-align:left; transition:background .15s;
+  }
+  .navitem:hover { background:var(--hover); }
+  .navitem.active { font-weight:700; }
+  .navitem.active .ic { stroke-width:2.6; }
+  .navitem .ic { width:26px; height:26px; flex-shrink:0; }
+  .navitem .lbl { display:none; }
+  @media (min-width:1280px) { .navitem .lbl { display:inline; } .logo .t { display:inline; } }
+  .logo .t { display:none; font-size:1.1rem; }
+  .connbox { margin-top:auto; padding:10px; }
+  .conn {
+    display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:999px;
+    background:var(--panel); border:1px solid var(--border); color:var(--muted);
+    font-size:.8rem; cursor:pointer; width:100%;
+  }
+  .conn:hover { background:var(--panel2); }
+  .conn .dot { width:8px; height:8px; border-radius:50%; background:#f4212e; flex-shrink:0; }
+  .conn.ok .dot { background:#00ba7c; }
+  .conn.ok { color:var(--text); }
 
-  /* ---------- Content ---------- */
-  .container { max-width:1200px; margin:0 auto; padding:18px 16px 60px; }
-  .grid {
-    display:grid; gap:16px;
-    grid-template-columns:repeat(auto-fill, minmax(270px, 1fr));
-    margin-top:14px;
+  /* ---------- Center feed ---------- */
+  .feed {
+    flex:1; max-width:600px; border-right:1px solid var(--border);
+    min-height:100vh; width:0;
   }
-  .card {
-    background:var(--bg2); border:1px solid var(--border); border-radius:12px;
-    overflow:hidden; cursor:pointer; transition:transform .15s, border-color .15s;
-    display:flex; flex-direction:column;
+  .feedhead {
+    position:sticky; top:0; z-index:10; background:rgba(0,0,0,.75);
+    backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
+    padding:10px 16px; display:flex; align-items:center; gap:12px;
   }
-  .card:hover { transform:translateY(-3px); border-color:var(--accent); }
-  .card img {
-    width:100%; aspect-ratio:16/9; object-fit:cover; background:var(--bg3);
-    display:block;
+  .feedhead h1 { font-size:1.2rem; font-weight:800; flex:1; }
+  .feedhead .back {
+    background:none; border:none; color:var(--text); cursor:pointer; font-size:1.1rem;
+    display:none; padding:6px 10px; border-radius:999px;
   }
-  .card .body { padding:12px 14px 14px; flex:1; display:flex; flex-direction:column; gap:6px; }
-  .card h3 { font-size:.95rem; line-height:1.45; }
-  .card .meta { font-size:.75rem; color:var(--muted); margin-top:auto; display:flex; gap:10px; flex-wrap:wrap; }
-  .card .cat { color:var(--accent2); }
+  .feedhead .back:hover { background:var(--hover); }
+  .feedhead .back.show { display:inline-block; }
 
-  /* ---------- Pager ---------- */
-  .pager { display:flex; gap:10px; justify-content:center; margin-top:26px; align-items:center; }
-  .pager button {
-    background:var(--bg2); border:1px solid var(--border); color:var(--text);
-    padding:8px 18px; border-radius:8px; cursor:pointer; font-size:.9rem;
+  /* ---------- Post card ---------- */
+  .post {
+    display:flex; gap:12px; padding:14px 16px; border-bottom:1px solid var(--border);
+    cursor:pointer; transition:background .15s;
   }
-  .pager button:disabled { opacity:.4; cursor:default; }
-  .pager span { color:var(--muted); font-size:.85rem; }
+  .post:hover { background:#080808; }
+  .post .av {
+    width:44px; height:44px; border-radius:50%; background:var(--panel2);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    font-size:1.2rem; overflow:hidden;
+  }
+  .post .av img { width:100%; height:100%; object-fit:cover; }
+  .post .body { flex:1; min-width:0; }
+  .post .who { display:flex; align-items:center; gap:5px; flex-wrap:wrap; font-size:.95rem; }
+  .post .who b { font-weight:700; }
+  .post .who .hdl { color:var(--muted); }
+  .post .who .time { color:var(--muted); font-size:.875rem; }
+  .post .who .badge { color:var(--accent); font-size:.8rem; }
+  .post .cat {
+    display:inline-block; color:var(--accent); font-size:.8rem; font-weight:600;
+    margin-bottom:2px;
+  }
+  .post .txt { margin-top:2px; line-height:1.4; word-wrap:break-word; }
+  .post .excerpt { color:var(--muted); font-size:.9rem; margin-top:4px;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .post .pic {
+    margin-top:12px; border-radius:16px; overflow:hidden; border:1px solid var(--border);
+    background:var(--panel);
+  }
+  .post .pic img { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; }
+  .post .acts {
+    display:flex; gap:44px; margin-top:12px; color:var(--muted); font-size:.83rem;
+    align-items:center;
+  }
+  .post .acts span { display:flex; align-items:center; gap:6px; }
+  .post .acts svg { width:17px; height:17px; }
 
-  /* ---------- Article view ---------- */
-  .article { max-width:760px; margin:0 auto; }
-  .back {
-    background:none; border:none; color:var(--accent2); cursor:pointer;
-    font-size:.9rem; padding:6px 0;
-  }
-  .article h1 { font-size:1.5rem; margin:12px 0 8px; line-height:1.4; }
-  .article .meta { color:var(--muted); font-size:.83rem; margin-bottom:16px; display:flex; gap:12px; flex-wrap:wrap; }
-  .article img.cover { width:100%; border-radius:12px; margin-bottom:18px; }
-  .article .content { font-size:.98rem; color:#d5dbe3; }
-  .article .content p { margin-bottom:14px; }
-  .article .content img { max-width:100%; border-radius:10px; margin:8px 0; }
-  .article .content a { color:var(--accent2); }
-  .article .content h2,.article .content h3 { margin:20px 0 10px; }
-  .article .content ul,.article .content ol { margin:0 0 14px 22px; }
-
-  /* ---------- Generic list rows (arama/etiket/yazar vs.) ---------- */
-  .rows { display:grid; gap:10px; margin-top:14px; }
-  .row {
-    background:var(--bg2); border:1px solid var(--border); border-radius:10px;
-    padding:12px 16px; cursor:pointer; font-size:.92rem;
-    display:flex; justify-content:space-between; gap:10px; align-items:baseline; flex-wrap:wrap;
-  }
-  .row:hover { border-color:var(--accent); }
-  .row .sub { color:var(--muted); font-size:.78rem; }
-
-  /* ---------- Dev panel ---------- */
-  details.dev {
-    margin-top:30px; border:1px solid var(--border); border-radius:10px;
-    background:var(--bg2); padding:12px 16px;
-  }
-  details.dev summary { cursor:pointer; color:var(--muted); font-size:.85rem; }
-  details.dev .url { font-family:monospace; font-size:.8rem; color:var(--accent2); word-break:break-all; margin:10px 0; }
-  details.dev pre {
-    background:var(--bg); border:1px solid var(--border); border-radius:8px;
-    padding:12px; font-size:.78rem; overflow:auto; max-height:360px; margin-top:8px;
-  }
-
-  /* ---------- States ---------- */
-  .state { text-align:center; padding:70px 20px; color:var(--muted); }
-  .state .big { font-size:2.4rem; margin-bottom:10px; }
-  .state h2 { color:var(--text); margin-bottom:8px; font-size:1.1rem; }
-  .state code { background:var(--bg2); padding:2px 8px; border-radius:6px; font-size:.85rem; }
+  /* ---------- Spinner / empty ---------- */
+  .state { padding:60px 20px; text-align:center; color:var(--muted); }
   .spin {
-    width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--accent);
-    border-radius:50%; animation:r 1s linear infinite; margin:0 auto 16px;
+    width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--accent);
+    border-radius:50%; animation:r .8s linear infinite; margin:0 auto 14px;
   }
   @keyframes r { to { transform:rotate(360deg); } }
+  .state .big { font-size:2rem; margin-bottom:8px; }
+  .state code { background:var(--panel); padding:2px 8px; border-radius:6px; font-size:.85rem; }
+  .state h3 { color:var(--text); margin-bottom:6px; }
 
-  footer {
-    text-align:center; padding:24px 14px 34px; color:var(--muted);
-    font-size:.78rem; border-top:1px solid var(--border);
+  /* ---------- Pager ---------- */
+  .more {
+    display:block; width:100%; padding:16px; text-align:center; color:var(--accent);
+    background:none; border:none; border-bottom:1px solid var(--border);
+    font-size:.95rem; cursor:pointer;
   }
-  footer a { color:var(--accent2); text-decoration:none; }
+  .more:hover { background:var(--hover); }
+
+  /* ---------- Article ---------- */
+  .article { padding:16px; }
+  .article h1 { font-size:1.45rem; line-height:1.3; margin-bottom:10px; font-weight:800; }
+  .article .meta {
+    display:flex; gap:14px; color:var(--muted); font-size:.9rem; margin-bottom:16px; flex-wrap:wrap;
+  }
+  .article .cover { border-radius:16px; width:100%; margin-bottom:16px; border:1px solid var(--border); }
+  .article .content { line-height:1.65; font-size:1rem; color:#e7e9ea; }
+  .article .content p { margin-bottom:16px; }
+  .article .content img { max-width:100%; border-radius:14px; margin:6px 0; }
+  .article .content a { color:var(--accent); text-decoration:none; }
+  .article .content h2,.article .content h3 { margin:18px 0 10px; }
+  .article .content ul,.article .content ol { margin:0 0 16px 22px; }
+  .article .src { margin-top:18px; }
+  .article .src a { color:var(--accent); text-decoration:none; font-weight:600; }
+
+  /* ---------- Right panel ---------- */
+  .right {
+    width:350px; padding:12px 0; display:none; flex-shrink:0;
+  }
+  @media (min-width:1024px) { .right { display:block; } }
+  .right .box {
+    position:sticky; top:0; padding:0 16px;
+  }
+  .searchwrap {
+    background:var(--panel); border:1px solid var(--border); border-radius:999px;
+    display:flex; align-items:center; padding:10px 16px; margin-bottom:16px;
+  }
+  .searchwrap svg { width:18px; height:18px; color:var(--muted); margin-right:10px; flex-shrink:0; }
+  .searchwrap input { flex:1; background:none; border:none; outline:none; color:var(--text); font-size:.95rem; }
+  .widget {
+    background:var(--panel); border:1px solid var(--border); border-radius:16px;
+    padding:14px 16px; margin-bottom:16px;
+  }
+  .widget h2 { font-size:1.05rem; font-weight:800; margin-bottom:10px; }
+  .widget .row {
+    padding:10px 0; border-bottom:1px solid var(--border); cursor:pointer;
+  }
+  .widget .row:last-child { border-bottom:none; }
+  .widget .row:hover .n { text-decoration:underline; }
+  .widget .k { color:var(--muted); font-size:.78rem; }
+  .widget .n { font-weight:700; font-size:.92rem; margin:2px 0; }
+  .widget .v { color:var(--muted); font-size:.8rem; }
+  .foot { color:var(--muted); font-size:.78rem; padding:16px; line-height:1.8; }
+  .foot a { color:inherit; text-decoration:none; }
+  .foot a:hover { text-decoration:underline; }
+
+  /* ---------- Dev ---------- */
+  details.dev { border-top:1px solid var(--border); padding:12px 16px; }
+  details.dev summary { cursor:pointer; color:var(--muted); font-size:.83rem; }
+  details.dev .url { font-family:monospace; font-size:.78rem; color:var(--accent); word-break:break-all; margin:10px 0; }
+  details.dev pre {
+    background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    padding:12px; font-size:.75rem; overflow:auto; max-height:340px; margin-top:8px;
+  }
 </style>
 </head>
 <body>
+<div class="layout">
 
-<header>
-  <div class="logo" onclick="goHome()">📰 shiftdelete<span>.api</span></div>
-  <form class="searchbar" onsubmit="doSearch(event)">
-    <input id="q" placeholder="Haber ara… (örn. iphone)">
-    <button type="submit">Ara</button>
-  </form>
-  <div class="conn" id="conn" onclick="showConnModal()">
-    <span class="dot"></span><span id="connText">bağlanıyor…</span>
-  </div>
-</header>
+  <!-- Left nav -->
+  <nav class="side">
+    <div class="logo" onclick="go('latest')" title="ShiftDelete">
+      📰<span class="t">ShiftDelete</span>
+    </div>
+    <button class="navitem active" data-id="latest" onclick="go('latest')">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-8 9 8v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      <span class="lbl">Ana Sayfa</span>
+    </button>
+    <button class="navitem" data-id="videos" onclick="go('videos')">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="14" height="14" rx="3"/><path d="M16 10l6-3v10l-6-3"/></svg>
+      <span class="lbl">Videolar</span>
+    </button>
+    <button class="navitem" data-id="gallery" onclick="go('gallery')">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      <span class="lbl">Galeri</span>
+    </button>
+    <button class="navitem" data-id="reviews" onclick="go('reviews')">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <span class="lbl">İncelemeler</span>
+    </button>
+    <button class="navitem" data-id="howto" onclick="go('howto')">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      <span class="lbl">Nasıl Yapılır</span>
+    </button>
+    <div class="connbox">
+      <button class="conn" id="conn" onclick="connModal()">
+        <span class="dot"></span><span id="connText">bağlanıyor…</span>
+      </button>
+    </div>
+  </nav>
 
-<div class="tabs" id="tabs"></div>
-<div class="container" id="app"><div class="state"><div class="spin"></div>yükleniyor…</div></div>
+  <!-- Center -->
+  <main class="feed">
+    <div class="feedhead">
+      <button class="back" id="backBtn" onclick="go(curSection)">←</button>
+      <h1 id="feedTitle">Ana Sayfa</h1>
+    </div>
+    <div id="feed"><div class="state"><div class="spin"></div>yükleniyor…</div></div>
+    <details class="dev" id="dev" style="display:none">
+      <summary>🛠️ Geliştirici · ham JSON ve endpoint</summary>
+      <div class="url" id="devUrl"></div>
+      <pre id="devJson"></pre>
+    </details>
+  </main>
 
-<footer>
-  Resmi değildir · tüm içerik hakları <a href="https://shiftdelete.net" target="_blank" rel="noopener">ShiftDelete.Net</a>'e aittir ·
-  kaynağında okumak için: <a href="https://shiftdelete.net" target="_blank" rel="noopener">shiftdelete.net</a> 💙
-</footer>
+  <!-- Right -->
+  <aside class="right">
+    <div class="box">
+      <div class="searchwrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="q" placeholder="Ara" onkeydown="if(event.key==='Enter')doSearch()">
+      </div>
+      <div class="widget" id="trend" style="display:none">
+        <h2>🔥 Türkiye'de gündem</h2>
+        <div id="trendRows"></div>
+      </div>
+      <div class="widget">
+        <h2>API Durumu</h2>
+        <div id="statusWidget" class="v">yükleniyor…</div>
+      </div>
+      <div class="foot">
+        Resmi değildir · içerik hakları <a href="https://shiftdelete.net" target="_blank" rel="noopener">ShiftDelete.Net</a>'e aittir ·
+        kaynağı: <a href="https://shiftdelete.net" target="_blank" rel="noopener">shiftdelete.net</a> 💙<br>
+        Unofficial REST API · <a href="#" onclick="event.preventDefault();const d=document.getElementById('dev');d.style.display=d.style.display==='none'?'':'none'">geliştirici modu</a>
+      </div>
+    </div>
+  </aside>
+</div>
 
 <script>
 /* ---------- API base ---------- */
 let BASE = '';
 const isStatic = !!(location.hostname.endsWith('.github.io') || location.protocol === 'file:');
 if (isStatic) BASE = (localStorage.getItem('apiBase') || 'http://localhost:3000').replace(/\/+$/, '');
-const api = (p) => BASE + p;
+const api = p => BASE + p;
 
-/* ---------- Conn badge ---------- */
-async function checkConn() {
-  const el = document.getElementById('conn'), t = document.getElementById('connText');
-  try {
-    const r = await fetch(api('/api/v1/health'), { signal: AbortSignal.timeout(4000) });
-    if (!r.ok) throw 0;
-    el.classList.add('ok'); t.textContent = 'bağlı';
-  } catch {
-    el.classList.remove('ok');
-    t.textContent = isStatic ? 'bağlantı yok' : 'sunucu kapalı';
-  }
-}
+const feed = document.getElementById('feed');
+const TITLES = { latest:'Ana Sayfa', videos:'Videolar', gallery:'Galeri', reviews:'İncelemeler', howto:'Nasıl Yapılır' };
+let curSection = 'latest', page = 1, items = [], lastJSON = null, lastURL = '';
 
-function showConnModal() {
-  const cur = isStatic ? (localStorage.getItem('apiBase') || 'http://localhost:3000') : '';
-  const v = prompt(
-    'API sunucu adresi.\n\n' +
-    (isStatic
-      ? 'Canlı veri için bilgisayarında projeyi başlat:\nnpm start\n\nSonra adresi gir (örn. http://localhost:3000):'
-      : 'Yerel sunucu kullanılıyor. Başlatmak için: npm start'),
-    cur
-  );
-  if (v !== null && isStatic) { localStorage.setItem('apiBase', v.trim().replace(/\/+$/, '')); location.reload(); }
-}
-
-/* ---------- Helpers ---------- */
-const app = document.getElementById('app');
-let lastJSON = null, lastURL = '';
-
-async function get(path, quiet) {
-  lastURL = api(path);
+async function get(p) {
+  lastURL = api(p);
   const r = await fetch(lastURL);
   const j = await r.json();
   lastJSON = j;
   if (!r.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
   return j;
 }
-function esc(s) {
-  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function spinner() { app.innerHTML = '<div class="state"><div class="spin"></div>yükleniyor…</div>'; }
-function failView(e) {
-  checkConn();
-  app.innerHTML = `
-    <div class="state">
-      <div class="big">🔌</div>
-      <h2>Veri alınamadı</h2>
-      <p>${esc(e.message || 'Hata')}</p>
-      ${isStatic ? `<p style="margin-top:12px">Bilgisayarında API'yi başlat:<br><code>npm start</code><br>sonra üstteki bağlantı noktasından adresi gir.</p>` : `<p style="margin-top:12px">Sunucu açık mı? <code>npm start</code></p>`}
-    </div>`;
-}
-function fmtDate(d) {
+const esc = s => (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const relTime = d => {
   if (!d) return '';
-  try { return new Date(d).toLocaleDateString('tr-TR', { day:'numeric', month:'long', year:'numeric' }); } catch { return d; }
-}
-function devBlock() {
-  if (!lastURL) return '';
-  return `
-    <details class="dev">
-      <summary>🛠️ Geliştirici: ham JSON ve endpoint</summary>
-      <div class="url">${esc(lastURL)}</div>
-      <button class="back" onclick="navigator.clipboard.writeText('${esc(lastURL).replace(/'/g,"\\'")}')" style="color:var(--accent2)">📋 URL kopyala</button>
-      <pre>${esc(JSON.stringify(lastJSON, null, 2))}</pre>
-    </details>`;
-}
-function pager(meta, fnName) {
-  if (!meta || !meta.totalPages || meta.totalPages <= 1) return '';
-  return `
-    <div class="pager">
-      <button onclick="${fnName}(${Math.max(1, meta.page - 1)})" ${meta.page <= 1 ? 'disabled' : ''}>← önceki</button>
-      <span>sayfa ${meta.page} / ${meta.totalPages} · ${meta.total} kayıt</span>
-      <button onclick="${fnName}(${Math.min(meta.totalPages, meta.page + 1)})" ${meta.page >= meta.totalPages ? 'disabled' : ''}>sonraki →</button>
-    </div>`;
-}
+  const diff = (Date.now() - new Date(d)) / 1000;
+  if (isNaN(diff)) return '';
+  if (diff < 3600) return Math.max(1, Math.floor(diff / 60)) + ' sa';
+  if (diff < 86400) return Math.floor(diff / 3600) + ' sa';
+  if (diff < 86400 * 7) return Math.floor(diff / 86400) + ' g';
+  return new Date(d).toLocaleDateString('tr-TR', { day:'numeric', month:'short' });
+};
+
+/* ---------- Post card (X-style) ---------- */
 function postCard(p) {
   const img = p.image || (p.media && p.media.url) || '';
   const author = p.author && typeof p.author === 'object' ? p.author.name : p.author;
-  const cat = Array.isArray(p.categories) ? p.categories[0] : p.category;
+  const avatar = p.author && p.author.avatar ? `<img src="${esc(p.author.avatar)}" alt="">` : '📰';
+  const cat = Array.isArray(p.categories) && p.categories[0] ? p.categories[0] : '';
   return `
-    <div class="card" onclick="openArticle('${esc(p.slug)}')">
-      ${img ? `<img src="${esc(img)}" loading="lazy" alt="">` : ''}
-      <div class="body">
-        ${cat ? `<div class="cat">${esc(cat)}</div>` : ''}
-        <h3>${esc(p.title)}</h3>
-        <div class="meta">
-          ${author ? `<span>✍️ ${esc(author)}</span>` : ''}
-          ${p.date ? `<span>📅 ${fmtDate(p.date)}</span>` : ''}
-          ${p.readingTimeMinutes ? `<span>⏱️ ${p.readingTimeMinutes} dk</span>` : ''}
-        </div>
+  <article class="post" onclick="openArticle('${esc(p.slug)}')">
+    <div class="av">${avatar}</div>
+    <div class="body">
+      <div class="who">
+        <b>${esc(author || 'ShiftDelete.Net')}</b>
+        <span class="badge">✓</span>
+        <span class="hdl">@shiftdelete</span>
+        <span class="time">· ${relTime(p.date)}</span>
       </div>
+      ${cat ? `<span class="cat">${esc(cat)}</span>` : ''}
+      <div class="txt">${esc(p.title)}</div>
+      ${p.excerpt ? `<div class="excerpt">${esc(p.excerpt)}</div>` : ''}
+      ${img ? `<div class="pic"><img src="${esc(img)}" loading="lazy" alt=""></div>` : ''}
+      <div class="acts">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3l-9 9"/></svg>${p.readingTimeMinutes || '~3'} dk</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.8-.9L3 21l2-5.2a8.3 8.3 0 0 1-1-4 8.4 8.4 0 0 1 8.5-8.3 8.4 8.4 0 0 1 8.5 8z"/></svg>haber</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>kaynak</span>
+      </div>
+    </div>
+  </article>`;
+}
+
+/* ---------- Loaders ---------- */
+function setNav(id) {
+  document.querySelectorAll('.navitem').forEach(n => n.classList.toggle('active', n.dataset.id === id));
+  document.getElementById('feedTitle').textContent = TITLES[id] || 'Arama';
+}
+function showDev() {
+  const d = document.getElementById('dev');
+  if (!lastURL) { d.style.display = 'none'; return; }
+  d.style.display = '';
+  document.getElementById('devUrl').textContent = lastURL;
+  document.getElementById('devJson').textContent = JSON.stringify(lastJSON, null, 2);
+}
+function fail(e) {
+  checkConn();
+  feed.innerHTML = `
+    <div class="state">
+      <div class="big">🔌</div>
+      <h3>Veri alınamadı</h3>
+      <p>${esc(e.message || '')}</p>
+      ${isStatic
+        ? `<p style="margin-top:10px">Soldaki <b>bağlantı</b> düğmesinden API adresini gir.<br>Bilgisayarında: <code>npm start</code></p>`
+        : `<p style="margin-top:10px">Sunucu açık mı? <code>npm start</code></p>`}
     </div>`;
 }
-function postsView(j) {
-  const items = j.data || j.posts || [];
-  if (!items.length) return '<div class="state"><div class="big">🗂️</div><h2>Sonuç yok</h2></div>';
-  return `<div class="grid">${items.map(postCard).join('')}</div>${pager(j.meta)}`;
+
+async function go(id, pg) {
+  curSection = id; page = pg || 1; items = [];
+  setNav(id);
+  document.getElementById('backBtn').classList.remove('show');
+  feed.innerHTML = '<div class="state"><div class="spin"></div>yükleniyor…</div>';
+  history.replaceState(null, '', '#' + id);
+  try {
+    const j = await get(`/api/v1/${id}?page=${page}&per_page=15`);
+    items = j.data || [];
+    renderList(j, `loadMore('${id}')`);
+  } catch (e) { fail(e); }
 }
 
-/* ---------- Views ---------- */
-const SECTIONS = [
-  { id:'latest', label:'📰 Haber' },
-  { id:'videos', label:'🎬 Video' },
-  { id:'gallery', label:'📷 Galeri' },
-  { id:'reviews', label:'🔍 İnceleme' },
-  { id:'howto', label:'🛠️ Nasıl Yapılır' },
-];
-let currentSection = 'latest', currentPage = 1;
+function renderList(j, moreFn) {
+  if (!items.length) {
+    feed.innerHTML = '<div class="state"><div class="big">🗂️</div><h3>Sonuç yok</h3></div>';
+  } else {
+    feed.innerHTML = items.map(postCard).join('') +
+      (j.meta && j.meta.page < j.meta.totalPages ? `<button class="more" onclick="${moreFn}">Daha fazla göster</button>` : '');
+  }
+  showDev();
+}
 
-const tabsEl = document.getElementById('tabs');
-tabsEl.innerHTML = SECTIONS.map(s =>
-  `<button class="tab ${s.id === currentSection ? 'active' : ''}" onclick="loadSection('${s.id}',1)">${s.label}</button>`
-).join('');
+function loadMore(id) {
+  go(id, page + 1).then(() => {});
+}
 
-function goHome() { loadSection(currentSection, 1); }
-
-async function loadSection(id, page) {
-  currentSection = id; currentPage = page;
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.textContent.trim() === SECTIONS.find(s=>s.id===id).label));
-  history.replaceState(null, '', '#' + id + (page > 1 ? '/' + page : ''));
-  spinner();
+async function doSearch() {
+  const q = document.getElementById('q').value.trim();
+  if (!q) return;
+  setNav('latest');
+  document.getElementById('feedTitle').textContent = `Ara: "${q}"`;
+  document.getElementById('backBtn').classList.add('show');
+  feed.innerHTML = '<div class="state"><div class="spin"></div>yükleniyor…</div>';
   try {
-    const j = await get(`/api/v1/${id}?page=${page}&per_page=12`);
-    app.innerHTML = postsView(j) + devBlock();
-  } catch (e) { failView(e); }
+    const j = await get(`/api/v1/search/posts?q=${encodeURIComponent(q)}&per_page=20`);
+    items = j.data || j.posts || [];
+    feed.innerHTML = (items.length ? items.map(postCard).join('') : '<div class="state"><div class="big">🔍</div><h3>Sonuç yok</h3></div>');
+    showDev();
+  } catch (e) { fail(e); }
 }
 
 async function openArticle(slug) {
-  spinner();
+  feed.innerHTML = '<div class="state"><div class="spin"></div>yükleniyor…</div>';
+  document.getElementById('backBtn').classList.add('show');
+  document.getElementById('feedTitle').textContent = 'Haber';
   try {
     const j = await get(`/api/v1/news/${slug}`);
     const a = j.data || j;
-    const img = a.image || (a.seo && a.seo.ogImage) || '';
     const author = a.author && typeof a.author === 'object' ? a.author.name : a.author;
-    let html = (a.contentHtml || a.plainText || a.excerpt || '');
-    html = html.replace(/<script[\s\S]*?<\/script>/gi, '');
-    app.innerHTML = `
+    const img = a.image || (a.seo && a.seo.ogImage) || '';
+    let html = (a.contentHtml || a.plainText || a.excerpt || '').replace(/<script[\s\S]*?<\/script>/gi, '');
+    feed.innerHTML = `
       <div class="article">
-        <button class="back" onclick="loadSection('${currentSection}', ${currentPage})">← geri</button>
+        <div class="who" style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div class="av" style="width:40px;height:40px;border-radius:50%;background:var(--panel2);display:flex;align-items:center;justify-content:center">📰</div>
+          <div>
+            <b>${esc(author || 'ShiftDelete.Net')}</b> <span style="color:var(--accent)">✓</span>
+            <div style="color:var(--muted);font-size:.85rem">@shiftdelete</div>
+          </div>
+        </div>
         <h1>${esc(a.title)}</h1>
         <div class="meta">
-          ${author ? `<span>✍️ ${esc(author)}</span>` : ''}
-          ${a.date ? `<span>📅 ${fmtDate(a.date)}</span>` : ''}
+          <span>📅 ${a.date ? new Date(a.date).toLocaleString('tr-TR') : ''}</span>
           ${a.readingTimeMinutes ? `<span>⏱️ ${a.readingTimeMinutes} dk okuma</span>` : ''}
           ${Array.isArray(a.categories) && a.categories.length ? `<span>🏷️ ${esc(a.categories.join(', '))}</span>` : ''}
         </div>
         ${img ? `<img class="cover" src="${esc(img)}" alt="">` : ''}
         <div class="content">${html}</div>
-        <p style="margin-top:20px"><a href="https://shiftdelete.net/${esc(slug)}" target="_blank" rel="noopener" style="color:var(--accent2)">Kaynağında oku →</a></p>
-      </div>
-      ${devBlock()}`;
+        <div class="src"><a href="https://shiftdelete.net/${esc(slug)}" target="_blank" rel="noopener">Kaynağında oku →</a></div>
+      </div>`;
+    showDev();
     window.scrollTo(0, 0);
-  } catch (e) { failView(e); }
+  } catch (e) { fail(e); }
 }
 
-async function doSearch(ev) {
-  ev.preventDefault();
-  const q = document.getElementById('q').value.trim();
-  if (!q) return;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  spinner();
+/* ---------- Trending (last 5 as gündem) ---------- */
+async function loadTrend() {
   try {
-    const j = await get(`/api/v1/search/posts?q=${encodeURIComponent(q)}&per_page=20`);
-    app.innerHTML = `<h2 style="margin-top:6px">🔎 "${esc(q)}" için sonuçlar</h2>` + postsView(j) + devBlock();
-  } catch (e) { failView(e); }
+    const j = await get('/api/v1/latest?per_page=5');
+    const rows = (j.data || []).map((p, i) => `
+      <div class="row" onclick="openArticle('${esc(p.slug)}')">
+        <div class="k">${i + 1} · Haber</div>
+        <div class="n">${esc(p.title.length > 70 ? p.title.slice(0, 70) + '…' : p.title)}</div>
+        <div class="v">${relTime(p.date)} önce</div>
+      </div>`).join('');
+    document.getElementById('trendRows').innerHTML = rows;
+    document.getElementById('trend').style.display = '';
+  } catch {}
+}
+
+/* ---------- Conn ---------- */
+async function checkConn() {
+  const el = document.getElementById('conn'), t = document.getElementById('connText'), w = document.getElementById('statusWidget');
+  try {
+    const r = await fetch(api('/api/v1/health'), { signal: AbortSignal.timeout(4000) });
+    if (!r.ok) throw 0;
+    el.classList.add('ok'); t.textContent = 'bağlı';
+    const h = await r.json();
+    const cache = h.cache ? (h.cache.hitRatio !== undefined ? h.cache.hitRatio : (h.cache.hits || 0)) : '-';
+    w.innerHTML = `<span style="color:#00ba7c">● çalışıyor</span><br>upstream: ${h.upstream || '-'} · önbellek: ${cache}`;
+  } catch {
+    el.classList.remove('ok');
+    t.textContent = isStatic ? 'bağlantı yok' : 'sunucu kapalı';
+    w.innerHTML = '<span style="color:#f4212e">● kapalı</span><br>Bağlamak için soldaki düğme · npm start';
+  }
+}
+function connModal() {
+  const cur = isStatic ? (localStorage.getItem('apiBase') || 'http://localhost:3000') : '';
+  const v = prompt(
+    'API sunucu adresi.\n\n' +
+    (isStatic ? 'Canlı veri için bilgisayarında:\nnpm start\n\nAdresi gir (örn. http://localhost:3000):'
+              : 'Yerel sunucu kullanılıyor.\nBaşlatmak için: npm start'),
+    cur);
+  if (v !== null && isStatic) { localStorage.setItem('apiBase', v.trim().replace(/\/+$/, '')); location.reload(); }
 }
 
 /* ---------- Boot ---------- */
-const h = location.hash.replace('#', '').split('/');
-if (h[0] && SECTIONS.some(s => s.id === h[0])) currentSection = h[0];
-loadSection(currentSection, parseInt(h[1]) || 1);
+const h0 = location.hash.replace('#', '');
+go(TITLES[h0] ? h0 : 'latest');
 checkConn();
+loadTrend();
 </script>
 </body>
 </html>
