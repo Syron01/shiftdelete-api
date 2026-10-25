@@ -28,7 +28,7 @@ router.get('/:slug', wrap(async (req, res) => {
 
   const profile = normalizeAuthor(author.data[0]);
   const { data, total, totalPages } = await sdnJson(
-    `${wpBase(lang)}/posts?author=${profile.id}&page=${page}&per_page=${perPage}&_fields=${LIST_FIELDS}&${EMBED}`
+    `${wpBase(lang)}/posts?author=${profile.id}&page=${page}&per_page=${perPage}&${EMBED}`
   );
   return res.json({
     author: profile,
@@ -46,7 +46,7 @@ router.get('/:slug/posts', wrap(async (req, res) => {
   );
   if (!author.data.length) return res.status(404).json({ error: 'Yazar bulunamadı', slug: req.params.slug });
   const { data, total, totalPages } = await sdnJson(
-    `${wpBase(lang)}/posts?author=${author.data[0].id}&page=${page}&per_page=${perPage}&_fields=${LIST_FIELDS}&${EMBED}`
+    `${wpBase(lang)}/posts?author=${author.data[0].id}&page=${page}&per_page=${perPage}&${EMBED}`
   );
   return paginated(res, data.map(normalizePost), total, totalPages, page, perPage);
 }));

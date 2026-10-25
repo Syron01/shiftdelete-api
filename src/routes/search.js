@@ -40,7 +40,7 @@ router.get('/posts', wrap(async (req, res) => {
   const lang = getLang(req);
   const { page, perPage } = getPagination(req);
   const { data, total, totalPages } = await sdnJson(
-    `${wpBase(lang)}/posts?search=${encodeURIComponent(q)}&page=${page}&per_page=${perPage}&_fields=${LIST_FIELDS}&${EMBED}`
+    `${wpBase(lang)}/posts?search=${encodeURIComponent(q)}&page=${page}&per_page=${perPage}&${EMBED}`
   );
   return paginated(res, data.map(normalizePost), total, totalPages, page, perPage);
 }));

@@ -29,7 +29,7 @@ router.get('/:slug', wrap(async (req, res) => {
 
   const t = normalizeTag(tag.data[0]);
   const { data, total, totalPages } = await sdnJson(
-    `${wpBase(lang)}/posts?tags=${t.id}&page=${page}&per_page=${perPage}&_fields=${LIST_FIELDS}&${EMBED}`
+    `${wpBase(lang)}/posts?tags=${t.id}&page=${page}&per_page=${perPage}&${EMBED}`
   );
   return res.json({
     tag: t,

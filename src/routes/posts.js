@@ -5,7 +5,7 @@ const { normalizePost, normalizePostDetail, normalizeComment } = require('../nor
 const { wrap, getLang, getPagination, paginated } = require('../util');
 
 const router = express.Router();
-const POST_FIELDS = 'id,date,modified,slug,link,title,excerpt,content,author,categories,tags,featured_media,jetpack_featured_media_url,yoast_head_json';
+const POST_FIELDS = 'id,date,modified,slug,link,title,excerpt,content,author,categories,tags,featured_media,jetpack_featured_media_url,yoast_head_json,_embedded';
 const LIST_FIELDS = POST_FIELDS.replace(',content', '').replace(',yoast_head_json', '');
 const EMBED = '_embed=wp:featuredmedia,wp:term,author';
 
@@ -14,7 +14,7 @@ router.get('/latest', wrap(async (req, res) => {
   const lang = getLang(req);
   const { page, perPage } = getPagination(req);
   const { data, total, totalPages } = await sdnJson(
-    `${wpBase(lang)}/posts?page=${page}&per_page=${perPage}&_fields=${LIST_FIELDS}&${EMBED}`
+    `${wpBase(lang)}/posts?page=${page}&per_page=${perPage}&${EMBED}`
   );
   return paginated(res, data.map(normalizePost), total, totalPages, page, perPage);
 }));
@@ -36,7 +36,7 @@ for (const [path, sectionSlug] of [
     if (!cat.data.length) return res.status(404).json({ error: 'Bölüm bulunamadı', slug: sectionSlug });
     const catId = cat.data[0].id;
     const { data, total, totalPages } = await sdnJson(
-      `${wpBase(lang)}/posts?categories=${catId}&page=${page}&per_page=${perPage}&_fields=${LIST_FIELDS}&${EMBED}`
+      `${wpBase(lang)}/posts?categories=${catId}&page=${page}&per_page=${perPage}&${EMBED}`
     );
     return paginated(res, data.map(normalizePost), total, totalPages, page, perPage);
   }));
@@ -46,7 +46,7 @@ for (const [path, sectionSlug] of [
 router.get('/news/:slug', wrap(async (req, res) => {
   const lang = getLang(req);
   const { data } = await sdnJson(
-    `${wpBase(lang)}/posts?slug=${encodeURIComponent(req.params.slug)}&_fields=${POST_FIELDS}&${EMBED}`
+    `${wpBase(lang)}/posts?slug=${encodeURIComponent(req.params.slug)}&${EMBED}`
   );
   if (!data.length) return res.status(404).json({ error: 'Makale bulunamadı', slug: req.params.slug });
   return res.json(normalizePostDetail(data[0]));
@@ -62,7 +62,7 @@ router.get('/news/:slug/related', wrap(async (req, res) => {
   const self = data[0];
   const catId = self.categories?.[0];
   const { data: rel } = await sdnJson(
-    `${wpBase(lang)}/posts?categories=${catId}&exclude=${self.id}&per_page=6&_fields=${LIST_FIELDS}&${EMBED}`
+    `${wpBase(lang)}/posts?categories=${catId}&exclude=${self.id}&per_page=6&${EMBED}`
   );
   return res.json({ count: rel.length, data: rel.map(normalizePost) });
 }));

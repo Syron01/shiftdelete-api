@@ -25,6 +25,9 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
+// Statik varlıklar (logo vb.)
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
 // API dokümantasyonu (JSON): tüm endpointleri listeler
 app.get('/api', (req, res) => {
   const B = '/api/v1';

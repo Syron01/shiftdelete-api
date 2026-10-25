@@ -29,7 +29,7 @@ router.get('/:slug', wrap(async (req, res) => {
 
   const category = normalizeCategory(cat.data[0]);
   const { data, total, totalPages } = await sdnJson(
-    `${wpBase(lang)}/posts?categories=${category.id}&page=${page}&per_page=${perPage}&_fields=${LIST_FIELDS}&${EMBED}`
+    `${wpBase(lang)}/posts?categories=${category.id}&page=${page}&per_page=${perPage}&${EMBED}`
   );
   return res.json({
     category,
